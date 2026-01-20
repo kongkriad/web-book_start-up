@@ -3,3 +3,69 @@ npm install nodemon --save-dev
 npm install bcryptjs
 npm install express-session
 
+
+```
+star-up
+├─ README.md
+├─ components
+│  ├─ footer.html
+│  └─ navbar.html
+├─ config
+│  ├─ cloudinary.js
+│  └─ db.js
+├─ controllers
+│  ├─ authController.js
+│  └─ bookController.js
+├─ middleware
+│  ├─ auth.js
+│  └─ upload.js
+├─ models
+│  ├─ Book.js
+│  └─ User.js
+├─ package-lock.json
+├─ package.json
+├─ public
+│  ├─ css
+│  │  └─ style.css
+│  ├─ index.html
+│  ├─ js
+│  │  └─ main.js
+│  ├─ login.html
+│  └─ register.html
+├─ routes
+│  ├─ authRoutes.js
+│  └─ bookRoutes.js
+└─ server.js
+
+```
+```
+star-up
+├─ README.md
+├─ config
+│  ├─ cloudinary.js
+│  └─ db.js
+├─ controllers
+│  ├─ authController.js
+│  └─ bookController.js
+├─ middleware
+│  ├─ auth.js
+│  └─ upload.js
+├─ models
+│  ├─ Book.js
+│  └─ User.js
+├─ package-lock.json
+├─ package.json
+├─ public
+│  ├─ css
+│  │  └─ style.css
+│  ├─ index.html
+│  ├─ js
+│  │  └─ main.js
+│  ├─ login.html
+│  └─ register.html
+├─ routes
+│  ├─ authRoutes.js
+│  └─ bookRoutes.js
+└─ server.js
+
+```

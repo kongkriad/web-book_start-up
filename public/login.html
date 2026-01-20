@@ -4,7 +4,8 @@
   <title>Login</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+
+<body class="bg-login">
 
 <div class="auth-container">
   <div class="auth-header">
@@ -22,9 +23,9 @@
       <input id="password" type="password">
     </div>
 
-    <button class="btn" onclick="login()">Login</button>
+    <button class="btn w-100" onclick="login()">Login</button>
 
-    <div id="result"></div>
+    <div id="result" class="mt-2 text-danger"></div>
 
     <div class="auth-footer">
       ยังไม่มีบัญชี?
@@ -32,7 +33,6 @@
     </div>
   </div>
 </div>
-
 
 <script>
 async function login() {
@@ -54,7 +54,6 @@ async function login() {
   }
 }
 </script>
-
 
 </body>
 </html>

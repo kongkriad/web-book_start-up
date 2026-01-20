@@ -17,3 +17,33 @@ res.json(book);
 res.status(500).json({ error: err.message });
 }
 };
+
+exports.getBooks = async (req, res) => {
+  const books = await Book.find().sort({ createdAt: -1 });
+  res.json(books);
+};
+
+const cloudinary = require('../config/cloudinary');
+
+exports.deleteBook = async (req, res) => {
+  const book = await Book.findById(req.params.id);
+  if (!book) return res.status(404).json({ message: 'Not found' });
+
+  // ดึง public_id จาก URL
+  const getPublicId = (url) =>
+    url.split('/').pop().split('.')[0];
+
+  await cloudinary.uploader.destroy(
+    `books/covers/${getPublicId(book.coverImage)}`
+  );
+
+  await cloudinary.uploader.destroy(
+    `books/pdf/${getPublicId(book.pdfFile)}`,
+    { resource_type: 'raw' }
+  );
+
+  await Book.findByIdAndDelete(req.params.id);
+
+  res.json({ message: 'Book deleted' });
+};
+
