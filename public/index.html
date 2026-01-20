@@ -7,22 +7,27 @@
 </head>
 <body>
 
-  <div class="admin-container">
-    <div class="admin-header">
-      <h1>📘 Book Code Management</h1>
-    </div>
-
-    <div class="admin-content">
-      <div class="form-group">
-        <label>Book Title</label>
-        <input id="title" placeholder="Enter book title" />
-      </div>
-
-      <button class="btn" onclick="createBook()">Create Book Code</button>
-
-      <div id="result"></div>
-    </div>
+  <div class="admin-content">
+  <div class="form-group">
+    <label>Book Title</label>
+    <input id="title" placeholder="Enter book title" />
   </div>
+
+  <div class="form-group">
+    <label>Book Cover (Image)</label>
+    <input type="file" id="cover" accept="image/*" />
+  </div>
+
+  <div class="form-group">
+    <label>Book PDF File</label>
+    <input type="file" id="pdf" accept="application/pdf" />
+  </div>
+
+  <button class="btn" onclick="createBook()">Create Book</button>
+
+  <div id="result"></div>
+</div>
+
 
   <script src="js/main.js"></script>
 </body>

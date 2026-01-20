@@ -1,18 +1,29 @@
 async function createBook() {
   const title = document.getElementById('title').value;
-  if (!title) return alert('Please enter book title');
+  const cover = document.getElementById('cover').files[0];
+  const pdf = document.getElementById('pdf').files[0];
+
+  if (!title || !cover || !pdf) {
+    alert('Please complete all fields');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('title', title);
+  formData.append('cover', cover);
+  formData.append('pdf', pdf);
 
   const res = await fetch('/api/books', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title })
+    body: formData
   });
 
   const data = await res.json();
 
   document.getElementById('result').innerHTML = `
     <div class="result-box">
-      Book Code Created: ${data.bookCode}
+      ✅ Book Created<br/>
+      Code: ${data.bookCode}
     </div>
   `;
 }

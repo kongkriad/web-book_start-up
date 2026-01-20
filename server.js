@@ -12,5 +12,4 @@ app.use(express.static('public'));
 
 app.use('/api/books', require('./routes/bookRoutes'));
 
-// const PORT = process.env.PORT || 5000;
 app.listen(5000, () => console.log("Server running on port http://localhost:5000"));
