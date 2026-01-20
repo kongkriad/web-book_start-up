@@ -36,3 +36,14 @@ async function createBook() {
     messageEl.textContent = "เกิดข้อผิดพลาด";
   }
 }
+
+document.getElementById("logoutBtn")?.addEventListener("click", async (e) => {
+  e.preventDefault();
+
+  await fetch("/api/auth/logout", {
+    method: "POST",
+    credentials: "include"
+  });
+
+  window.location.href = "/login.html";
+});

@@ -27,23 +27,62 @@ exports.register = async (req, res) => {
 
 /* ===== LOGIN ===== */
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
-  if (!user) {
-    return res.status(400).json({ message: 'Invalid email or password' });
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    // ✅ set session ให้ชัดเจน
+    req.session.user = {
+      id: user._id,
+      email: user.email
+    };
+
+    res.json({ message: "Login success" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
+};
 
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    return res.status(400).json({ message: 'Invalid email or password' });
-  }
 
-  req.session.user = {
-    id: user._id,
-    email: user.email
-  };
+// exports.login = async (req, res) => {
+//   const { email, password } = req.body;
 
-  res.json({ message: 'Login success' });
+//   const user = await User.findOne({ email });
+//   if (!user) {
+//     return res.status(400).json({ message: 'Invalid email or password' });
+//   }
+
+//   const isMatch = await bcrypt.compare(password, user.password);
+//   if (!isMatch) {
+//     return res.status(400).json({ message: 'Invalid email or password' });
+//   }
+
+//   req.session.user = {
+//     id: user._id,
+//     email: user.email
+//   };
+
+//   res.json({ message: 'Login success' });
+// };
+
+/* ===== LOGOUT ===== */
+exports.logout = (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ message: "Logout failed" });
+    }
+
+    res.clearCookie("connect.sid", { path: "/" });
+    res.status(200).json({ message: "Logout success" });
+  });
 };
 

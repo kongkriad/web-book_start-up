@@ -1,10 +1,22 @@
-async function loadComponent(id, path) {
-  const res = await fetch(path)
-  const html = await res.text()
-  document.getElementById(id).innerHTML = html
-}
+fetch("/components/navbar.html")
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById("navbar").innerHTML = html;
 
-document.addEventListener("DOMContentLoaded", () => {
-  loadComponent("navbar", "/components/navbar.html")
-  loadComponent("footer", "/components/footer.html")
-})
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", logout);
+    }
+  });
+
+async function logout(e) {
+  e.preventDefault();
+  console.log("logout clicked");
+
+  await fetch("/api/auth/logout", {
+    method: "POST",
+    credentials: "include"
+  });
+
+  window.location.href = "/login.html";
+}
