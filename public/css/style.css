@@ -1,77 +1,121 @@
+/* ===== Global ===== */
 * {
-box-sizing: border-box;
-font-family: 'Segoe UI', Tahoma, sans-serif;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
 }
 
+html, body {
+  height: 100%;
+}
 
 body {
-margin: 0;
-background: #f4f6f8;
-color: #333;
+  margin: 0;
+  background: #f4f6f8;
+  color: #333;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
+/* content หลักของทุกหน้า (ดัน footer ลงล่าง) */
+.main-content {
+  flex: 1 0 auto;
+}
 
+/* ===== Navbar ===== */
+.navbar {
+  background: #2c3e50;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar h2 {
+  color: #fff;
+  margin: 0;
+}
+
+.navbar a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  background: #e74c3c;
+  padding: 8px 16px;
+  border-radius: 6px;
+}
+
+.navbar a:hover {
+  background: #c0392b;
+}
+
+/* ===== Admin ===== */
 .admin-container {
-max-width: 900px;
-margin: 40px auto;
-background: #fff;
-border-radius: 12px;
-box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-overflow: hidden;
+  max-width: 900px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  overflow: hidden;
 }
-
 
 .admin-header {
-background: linear-gradient(135deg, #2c3e50, #34495e);
-color: #fff;
-padding: 20px 30px;
+  background: linear-gradient(135deg, #2c3e50, #34495e);
+  color: #fff;
+  padding: 20px 30px;
 }
-
 
 .admin-header h1 {
-margin: 0;
-font-size: 24px;
+  margin: 0;
+  font-size: 24px;
 }
-
 
 .admin-content {
-padding: 30px;
+  padding: 30px;
 }
 
-
+/* ===== Forms ===== */
 .form-group {
-margin-bottom: 20px;
+  margin-bottom: 20px;
 }
-
 
 .form-group label {
-display: block;
-font-weight: 600;
-margin-bottom: 8px;
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
 }
-
 
 .form-group input {
-width: 100%;
-padding: 12px 14px;
-border-radius: 8px;
-border: 1px solid #ccc;
-font-size: 15px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
 }
-
 
 .form-group input:focus {
-outline: none;
-border-color: #3498db;
+  outline: none;
+  border-color: #3498db;
 }
 
-
+/* ===== Button ===== */
 .btn {
-display: inline-block;
-background: #3498db;
-color: #fff;
+  display: inline-block;
+  background: #3498db;
+  color: #fff;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
 }
 
+.btn:hover {
+  background: #2980b9;
+}
+
+/* ===== Auth (Login / Register) ===== */
 .auth-container {
   max-width: 420px;
   margin: 80px auto;
@@ -108,28 +152,11 @@ color: #fff;
   text-decoration: none;
 }
 
-.navbar {
+/* ===== Footer ===== */
+footer {
+  margin-top: auto;          /* 👈 ดัน footer ไปท้ายสุด */
   background: #2c3e50;
-  padding: 15px 30px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.navbar h2 {
   color: #fff;
-  margin: 0;
-}
-
-.navbar a {
-  color: #fff;
-  text-decoration: none;
-  font-weight: 600;
-  background: #e74c3c;
-  padding: 8px 16px;
-  border-radius: 6px;
-}
-
-.navbar a:hover {
-  background: #c0392b;
+  text-align: center;
+  padding: 15px;
 }
