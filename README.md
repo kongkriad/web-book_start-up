@@ -29,38 +29,10 @@ star-up
 │  │  └─ style.css
 │  ├─ index.html
 │  ├─ js
+│  │  ├─ layout.js
+│  │  ├─ library.js
 │  │  └─ main.js
-│  ├─ login.html
-│  └─ register.html
-├─ routes
-│  ├─ authRoutes.js
-│  └─ bookRoutes.js
-└─ server.js
-
-```
-```
-star-up
-├─ README.md
-├─ config
-│  ├─ cloudinary.js
-│  └─ db.js
-├─ controllers
-│  ├─ authController.js
-│  └─ bookController.js
-├─ middleware
-│  ├─ auth.js
-│  └─ upload.js
-├─ models
-│  ├─ Book.js
-│  └─ User.js
-├─ package-lock.json
-├─ package.json
-├─ public
-│  ├─ css
-│  │  └─ style.css
-│  ├─ index.html
-│  ├─ js
-│  │  └─ main.js
+│  ├─ library.html
 │  ├─ login.html
 │  └─ register.html
 ├─ routes

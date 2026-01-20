@@ -5,7 +5,10 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body class="bg-login">
+<body>
+
+<!-- Vanta Background -->
+<div id="vanta-bg"></div>
 
 <div class="auth-container">
   <div class="auth-header">
@@ -33,6 +36,37 @@
     </div>
   </div>
 </div>
+
+<!-- Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+
+<!-- Vanta Birds -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.birds.min.js"></script>
+
+<script>
+VANTA.BIRDS({
+  el: "#vanta-bg",
+
+  mouseControls: true,
+  touchControls: true,
+  gyroControls: false,
+
+  backgroundColor: 0x0b0f14,   // ดำอมฟ้า นุ่มกว่า pure black
+  color1: 0x6aa9ff,            // ฟ้าอ่อน
+  color2: 0xbfd7ff,
+
+  birdSize: 0.7,               // ตัวเล็กลง
+  wingSpan: 18,                // ปีกแคบ
+  speedLimit: 2.0,             // ช้าลง
+  separation: 80,              // เว้นระยะมากขึ้น
+  alignment: 40,
+  cohesion: 40,
+  quantity: 4,                 // ลดจำนวน (สำคัญมาก)
+
+  scale: 1.0,
+  scaleMobile: 0.8             // มือถือเบาลงอีก
+})
+</script>
 
 <script>
 async function login() {

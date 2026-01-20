@@ -7,6 +7,9 @@
 
 <body class="bg-login">
 
+<!-- Vanta Background -->
+<div id="vanta-bg"></div>
+
 <div class="auth-container">
   <div class="auth-header">
     <h1>Register Admin</h1>
@@ -33,6 +36,37 @@
     </div>
   </div>
 </div>
+
+<!-- Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+
+<!-- Vanta Birds -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.birds.min.js"></script>
+
+<script>
+VANTA.BIRDS({
+  el: "#vanta-bg",
+
+  mouseControls: true,
+  touchControls: true,
+  gyroControls: false,
+
+  backgroundColor: 0x0b1220,
+  color1: 0x7aa2ff,
+  color2: 0xd6e4ff,
+
+  birdSize: 0.8,
+  wingSpan: 20,
+  speedLimit: 2.2,
+  separation: 70,
+  alignment: 45,
+  cohesion: 45,
+  quantity: 5,
+
+  scale: 1.0,
+  scaleMobile: 0.75
+})
+</script>
 
 <script>
 async function register() {
