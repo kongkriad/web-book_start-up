@@ -22,7 +22,6 @@ exports.createBook = async (req, res) => {
     }
 
     const bookCode = `BK-${String(nextNumber).padStart(4, "0")}`;
-    console.log("BOOK CODE GENERATED:", bookCode);
 
     // 📦 create book
     const book = await Book.create({

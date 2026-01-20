@@ -5,7 +5,8 @@
 }
 
 html, body {
-  height: 100%;
+  height: auto;
+  min-height: 100%;
 }
 
 body {
@@ -219,5 +220,47 @@ footer {
   cursor: pointer;
 }
 
+/* หน้า library */
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 ช่องต่อแถว */
+  gap: 24px;
+  align-items: stretch;
+}
+
+@media (max-width: 1200px) {
+  .book-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .book-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .book-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.book-card {
+  overflow: hidden;  
+  width: 100%;
+}
+.book-card img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: 260px;
+  object-fit: cover;
+}
+
+.library-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
 
 

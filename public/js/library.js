@@ -11,21 +11,23 @@ async function loadBooks() {
     div.id = `book-${book._id}`;
 
     div.innerHTML = `
-      <img src="${book.coverImage.url}" />
+      <img src="${book.coverImage?.url}" alt="${book.title}">
       <p>${book.title}</p>
-      <small>${book.bookCode || ""}</small>
-      <button onclick="deleteBook('${book._id}')">Delete</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteBook('${book._id}')">
+        Delete
+      </button>
     `;
 
     container.appendChild(div);
   });
 }
 
-window.deleteBook = async function (id) {
-  if (!confirm("ต้องการลบหนังสือเล่มนี้หรือไม่?")) return;
+async function deleteBook(id) {
+  if (!confirm("ลบหนังสือเล่มนี้?")) return;
 
   await fetch("/api/books/" + id, { method: "DELETE" });
-  document.getElementById(`book-${id}`).remove();
-};
+
+  document.getElementById(`book-${id}`)?.remove();
+}
 
 loadBooks();
