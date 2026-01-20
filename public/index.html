@@ -6,7 +6,11 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-
+  <div class="navbar">
+  <h2>📘 Admin Dashboard</h2>
+  <a href="/api/auth/logout">Logout</a>
+</div>
+<div class="admin-container">
   <div class="admin-content">
   <div class="form-group">
     <label>Book Title</label>
@@ -26,8 +30,9 @@
   <button class="btn" onclick="createBook()">Create Book</button>
 
   <div id="result"></div>
-</div>
 
+</div>
+</div>
 
   <script src="js/main.js"></script>
 </body>
