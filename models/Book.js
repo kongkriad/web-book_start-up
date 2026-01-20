@@ -1,11 +1,24 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const BookSchema = new mongoose.Schema({
-title: String,
-bookCode: { type: String, unique: true },
-coverImage: String,
-pdfFile: String,
-createdAt: { type: Date, default: Date.now }
-});
+const bookSchema = new mongoose.Schema(
+  {
+    title: String,
 
-module.exports = mongoose.model('Book', BookSchema);
+    bookCode: {
+      type: String,
+      unique: true,
+    },
+
+    coverImage: {
+      url: String,
+      public_id: String,
+    },
+    pdfFile: {
+      url: String,
+      public_id: String,
+    },
+  },
+  { timestamps: true }
+);
+
+module.exports = mongoose.model("Book", bookSchema);

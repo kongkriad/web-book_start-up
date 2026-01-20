@@ -6,23 +6,26 @@ async function loadBooks() {
   container.innerHTML = "";
 
   books.forEach((book) => {
-    div.innerHTML += `
-  <div class="book-card" id="book-${book._id}">
-    <img src="${book.coverImage}" />
-    <p>${book.title}</p>
-    <button onclick="deleteBook('${book._id}')">Delete</button>
-  </div>
-`;
+    const div = document.createElement("div");
+    div.className = "book-card";
+    div.id = `book-${book._id}`;
+
+    div.innerHTML = `
+      <img src="${book.coverImage.url}" />
+      <p>${book.title}</p>
+      <small>${book.bookCode || ""}</small>
+      <button onclick="deleteBook('${book._id}')">Delete</button>
+    `;
+
+    container.appendChild(div);
   });
-  window.deleteBook = async function (id) {
-    console.log("DELETE:", id);
-
-    await fetch("/api/books/" + id, {
-      method: "DELETE",
-    });
-
-    document.getElementById(`book-${id}`).remove();
-  };
 }
+
+window.deleteBook = async function (id) {
+  if (!confirm("ต้องการลบหนังสือเล่มนี้หรือไม่?")) return;
+
+  await fetch("/api/books/" + id, { method: "DELETE" });
+  document.getElementById(`book-${id}`).remove();
+};
 
 loadBooks();

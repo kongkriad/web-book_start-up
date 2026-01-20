@@ -1,49 +1,95 @@
-const Book = require('../models/Book');
+const Book = require("../models/Book");
+const cloudinary = require("../config/cloudinary");
 
 exports.createBook = async (req, res) => {
-try {
-const count = await Book.countDocuments();
-const bookCode = `BK-${new Date().getFullYear()}-${String(count + 1).padStart(4, '0')}`;
+  try {
+    // 🔐 validate file
+    if (!req.files?.cover || !req.files?.pdf) {
+      return res.status(400).json({ message: "Cover image or PDF file is missing" });
+    }
 
-const book = await Book.create({
-title: req.body.title,
-bookCode,
-coverImage: req.files.cover[0].path,
-pdfFile: req.files.pdf[0].path
-});
+    // 🔢 generate bookCode แบบปลอดภัย
+    const lastBook = await Book.findOne({ bookCode: { $exists: true } })
+      .sort({ createdAt: -1 })
+      .select("bookCode");
 
-res.json(book);
-} catch (err) {
-res.status(500).json({ error: err.message });
-}
+    let nextNumber = 1;
+    if (lastBook?.bookCode) {
+      const lastNumber = parseInt(lastBook.bookCode.split("-")[1], 10);
+      if (!isNaN(lastNumber)) {
+        nextNumber = lastNumber + 1;
+      }
+    }
+
+    const bookCode = `BK-${String(nextNumber).padStart(4, "0")}`;
+    console.log("BOOK CODE GENERATED:", bookCode);
+
+    // 📦 create book
+    const book = await Book.create({
+      title: req.body.title?.trim(),
+      bookCode,
+      coverImage: {
+        url: req.files.cover[0].path,
+        public_id: req.files.cover[0].filename,
+      },
+      pdfFile: {
+        url: req.files.pdf[0].path,
+        public_id: req.files.pdf[0].filename,
+      },
+    });
+
+    res.status(201).json({
+      message: "Book Created",
+      bookCode: book.bookCode,
+      book,
+    });
+  } catch (err) {
+    console.error("CREATE BOOK ERROR:", err);
+
+    // 🚫 duplicate key
+    if (err.code === 11000) {
+      return res.status(409).json({
+        message: "Book code already exists",
+      });
+    }
+
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 exports.getBooks = async (req, res) => {
-  const books = await Book.find().sort({ createdAt: -1 });
-  res.json(books);
+  try {
+    const books = await Book.find().sort({ createdAt: -1 });
+    res.json(books);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch books" });
+  }
 };
-
-const cloudinary = require('../config/cloudinary');
 
 exports.deleteBook = async (req, res) => {
-  const book = await Book.findById(req.params.id);
-  if (!book) return res.status(404).json({ message: 'Not found' });
+  try {
+    const book = await Book.findById(req.params.id);
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
+    }
 
-  // ดึง public_id จาก URL
-  const getPublicId = (url) =>
-    url.split('/').pop().split('.')[0];
+    // 🖼️ delete cover image
+    if (book.coverImage?.public_id) {
+      await cloudinary.uploader.destroy(book.coverImage.public_id);
+    }
 
-  await cloudinary.uploader.destroy(
-    `books/covers/${getPublicId(book.coverImage)}`
-  );
+    // 📄 delete PDF (raw)
+    if (book.pdfFile?.public_id) {
+      await cloudinary.uploader.destroy(book.pdfFile.public_id, {
+        resource_type: "raw",
+      });
+    }
 
-  await cloudinary.uploader.destroy(
-    `books/pdf/${getPublicId(book.pdfFile)}`,
-    { resource_type: 'raw' }
-  );
+    await book.deleteOne();
 
-  await Book.findByIdAndDelete(req.params.id);
-
-  res.json({ message: 'Book deleted' });
+    res.json({ message: "Book deleted completely" });
+  } catch (err) {
+    console.error("DELETE BOOK ERROR:", err);
+    res.status(500).json({ message: "Failed to delete book" });
+  }
 };
-

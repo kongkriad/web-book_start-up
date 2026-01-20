@@ -1,29 +1,38 @@
 async function createBook() {
-  const title = document.getElementById('title').value;
-  const cover = document.getElementById('cover').files[0];
-  const pdf = document.getElementById('pdf').files[0];
+  const messageEl = document.getElementById("create-message");
 
-  if (!title || !cover || !pdf) {
-    alert('Please complete all fields');
-    return;
-  }
+  const title = document.getElementById("title").value;
+  const cover = document.getElementById("cover").files[0];
+  const pdf = document.getElementById("pdf").files[0];
 
   const formData = new FormData();
-  formData.append('title', title);
-  formData.append('cover', cover);
-  formData.append('pdf', pdf);
+  formData.append("title", title);
+  formData.append("cover", cover);
+  formData.append("pdf", pdf);
 
-  const res = await fetch('/api/books', {
-    method: 'POST',
-    body: formData
-  });
+  try {
+    const res = await fetch("/api/books", {
+      method: "POST",
+      body: formData,
+    });
 
-  const data = await res.json();
+    const result = await res.json();
 
-  document.getElementById('result').innerHTML = `
-    <div class="result-box">
-      ✅ Book Created<br/>
-      Code: ${data.bookCode}
-    </div>
-  `;
+    if (!res.ok) {
+      messageEl.style.color = "red";
+      messageEl.textContent = result.message || "Create book failed";
+      return;
+    }
+
+    messageEl.style.color = "green";
+    messageEl.textContent = "✅ สร้างหนังสือเรียบร้อยแล้ว";
+
+    document.getElementById("title").value = "";
+    document.getElementById("cover").value = "";
+    document.getElementById("pdf").value = "";
+
+  } catch (err) {
+    messageEl.style.color = "red";
+    messageEl.textContent = "เกิดข้อผิดพลาด";
+  }
 }
