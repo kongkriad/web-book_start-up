@@ -22,10 +22,16 @@ body {
 /* content หลักของทุกหน้า (ดัน footer ลงล่าง) */
 .main-content {
   flex: 1 0 auto;
+  padding-top: 80px;
 }
 
 /* ===== Navbar ===== */
 .navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
   background: #2c3e50;
   padding: 15px 30px;
   display: flex;
@@ -158,13 +164,14 @@ body {
 }
 
 /* ===== Footer ===== */
-footer {
-  margin-top: auto;          /* 👈 ดัน footer ไปท้ายสุด */
+#footer {
+  margin-top: auto;
   background: #2c3e50;
   color: #fff;
   text-align: center;
   padding: 15px;
 }
+
 
 #vanta-bg {
   position: fixed;
