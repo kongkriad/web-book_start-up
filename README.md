@@ -5,7 +5,8 @@ npm install express-session
 
 
 ```
-web-book_start-up
+star-up
+├─ README.md
 ├─ components
 │  ├─ footer.html
 │  └─ navbar.html
@@ -34,7 +35,6 @@ web-book_start-up
 │  ├─ library.html
 │  ├─ login.html
 │  └─ register.html
-├─ README.md
 ├─ routes
 │  ├─ authRoutes.js
 │  └─ bookRoutes.js
