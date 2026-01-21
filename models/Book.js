@@ -2,36 +2,39 @@ const mongoose = require("mongoose");
 
 const bookSchema = new mongoose.Schema(
   {
-    title: String,
+    title: {
+      type: String,
+      required: true,
+      trim: true
+    },
 
     bookCode: {
       type: String,
+      required: true,
       unique: true,
+      uppercase: true,
+      trim: true
     },
 
     coverImage: {
       url: String,
-      public_id: String,
+      public_id: String
     },
+
     pdfFile: {
       url: String,
-      public_id: String,
+      public_id: String
     },
-     addedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User"
-  },
 
-    createdAt: {
-      type: Date,
-      default: Date.now
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now
+    addedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null
     }
-    },
-    { timestamps: true }
+  },
+  {
+    timestamps: true // ✅ สร้าง createdAt / updatedAt ให้อัตโนมัติ
+  }
 );
 
 module.exports = mongoose.model("Book", bookSchema);

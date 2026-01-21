@@ -1,14 +1,25 @@
 const Book = require("../models/Book");
 const cloudinary = require("../config/cloudinary");
 
+/**
+ * ➕ Create Book
+ * (ต้อง login ก่อน)
+ */
 exports.createBook = async (req, res) => {
   try {
-    // 🔐 validate file
-    if (!req.files?.cover || !req.files?.pdf) {
-      return res.status(400).json({ message: "Cover image or PDF file is missing" });
+    // 🔐 ต้อง login
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
-    // 🔢 generate bookCode แบบปลอดภัย
+    // 🔐 validate file
+    if (!req.files?.cover || !req.files?.pdf) {
+      return res.status(400).json({
+        message: "Cover image or PDF file is missing"
+      });
+    }
+
+    // 🔢 generate bookCode
     const lastBook = await Book.findOne({ bookCode: { $exists: true } })
       .sort({ createdAt: -1 })
       .select("bookCode");
@@ -35,74 +46,102 @@ exports.createBook = async (req, res) => {
         url: req.files.pdf[0].path,
         public_id: req.files.pdf[0].filename,
       },
+      addedBy: req.user._id, // 🔥 สำคัญ
     });
 
     res.status(201).json({
-      message: "Book Created",
-      bookCode: book.bookCode,
+      message: "Book created successfully",
       book,
     });
+
   } catch (err) {
     console.error("CREATE BOOK ERROR:", err);
 
-    // 🚫 duplicate key
     if (err.code === 11000) {
       return res.status(409).json({
-        message: "Book code already exists",
+        message: "Book code already exists"
       });
     }
 
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({
+      message: "Internal server error"
+    });
   }
 };
 
+/**
+ * 📚 Get All Books
+ */
 exports.getBooks = async (req, res) => {
   try {
-    const books = await Book.find().sort({ createdAt: -1 });
+    const books = await Book.find({})
+      .sort({ createdAt: -1 })
+      .lean(); // ⭐ สำคัญ
+
     res.json(books);
   } catch (err) {
+    console.error("GET BOOKS ERROR 👉", err); // ⭐ ดูตรงนี้ใน terminal
     res.status(500).json({ message: "Failed to fetch books" });
   }
 };
 
+
+/**
+ * ❌ Delete Book
+ * (ลบ Cloudinary ด้วย)
+ */
 exports.deleteBook = async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
     if (!book) {
-      return res.status(404).json({ message: "Book not found" });
+      return res.status(404).json({
+        message: "Book not found"
+      });
     }
 
-    // 🖼️ delete cover image
+    // 🖼️ delete cover
     if (book.coverImage?.public_id) {
       await cloudinary.uploader.destroy(book.coverImage.public_id);
     }
 
-    // 📄 delete PDF (raw)
+    // 📄 delete pdf (raw)
     if (book.pdfFile?.public_id) {
-      await cloudinary.uploader.destroy(book.pdfFile.public_id, {
-        resource_type: "raw",
-      });
+      await cloudinary.uploader.destroy(
+        book.pdfFile.public_id,
+        { resource_type: "raw" }
+      );
     }
 
     await book.deleteOne();
 
-    res.json({ message: "Book deleted completely" });
+    res.json({
+      message: "Book deleted successfully"
+    });
+
   } catch (err) {
     console.error("DELETE BOOK ERROR:", err);
-    res.status(500).json({ message: "Failed to delete book" });
+    res.status(500).json({
+      message: "Failed to delete book"
+    });
   }
 };
+
+/**
+ * 📊 Dashboard Data
+ */
 exports.getDashboardData = async (req, res) => {
   try {
-    const userId = req.user.id;
+    if (!req.user) {
+      return res.status(401).json({
+        message: "Unauthorized"
+      });
+    }
 
-    // หนังสือทั้งหมดในระบบ
+    const userId = req.user._id;
+
     const totalBooks = await Book.countDocuments();
-
-    // หนังสือที่ user เพิ่ม
     const myBooks = await Book.countDocuments({ addedBy: userId });
 
-    // ประวัติ (ล่าสุด 5 รายการ)
     const history = await Book.find({ addedBy: userId })
       .sort({ createdAt: -1 })
       .limit(5)
@@ -113,7 +152,10 @@ exports.getDashboardData = async (req, res) => {
       myBooks,
       history
     });
+
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({
+      message: err.message
+    });
   }
 };
