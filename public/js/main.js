@@ -1,3 +1,6 @@
+/* =======================
+   ➕ CREATE BOOK
+======================= */
 async function createBook() {
   const messageEl = document.getElementById("create-message");
 
@@ -13,6 +16,7 @@ async function createBook() {
   try {
     const res = await fetch("/api/books", {
       method: "POST",
+      credentials: "include", // 🔥 สำคัญมาก (session)
       body: formData,
     });
 
@@ -37,6 +41,9 @@ async function createBook() {
   }
 }
 
+/* =======================
+   🚪 LOGOUT
+======================= */
 document.getElementById("logoutBtn")?.addEventListener("click", async (e) => {
   e.preventDefault();
 
@@ -48,28 +55,39 @@ document.getElementById("logoutBtn")?.addEventListener("click", async (e) => {
   window.location.href = "/login.html";
 });
 
+/* =======================
+   📊 DASHBOARD
+======================= */
 document.addEventListener("DOMContentLoaded", async () => {
-  const token = localStorage.getItem("token");
-  if (!token) return location.href = "login.html";
+  try {
+    const res = await fetch("/api/books/dashboard", {
+      credentials: "include" // 🔥 ใช้ session
+    });
 
-  const res = await fetch("/api/books/dashboard", {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  const data = await res.json();
+    // 🔒 ถ้า session หมด
+    if (res.status === 401) {
+      return location.href = "/login.html";
+    }
 
-  document.getElementById("totalBooks").innerText = data.totalBooks;
-  document.getElementById("myBooks").innerText = data.myBooks;
+    const data = await res.json();
 
-  const table = document.getElementById("historyTable");
-  table.innerHTML = "";
+    document.getElementById("totalBooks").innerText = data.totalBooks;
+    document.getElementById("myBooks").innerText = data.myBooks;
 
-  data.history.forEach(b => {
-    table.innerHTML += `
-      <tr>
-        <td>${b.title}</td>
-        <td>${new Date(b.createdAt).toLocaleString()}</td>
-      </tr>
-    `;
-  });
+    const table = document.getElementById("historyTable");
+    table.innerHTML = "";
+
+    data.history.forEach(b => {
+      table.innerHTML += `
+        <tr>
+          <td>${b.title}</td>
+          <td>${b.addedBy?.email || "-"}</td>
+          <td>${new Date(b.createdAt).toLocaleString()}</td>
+        </tr>
+      `;
+    });
+
+  } catch (err) {
+    console.error("Dashboard error:", err);
+  }
 });
-

@@ -3,19 +3,19 @@ const cloudinary = require("../config/cloudinary");
 
 /**
  * ➕ Create Book
- * (ต้อง login ก่อน)
+ * (ต้อง login ก่อน — ใช้ session)
  */
 exports.createBook = async (req, res) => {
   try {
-    // 🔐 ต้อง login
-    if (!req.user) {
+    // 🔐 check session
+    if (!req.session.user) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
     // 🔐 validate file
     if (!req.files?.cover || !req.files?.pdf) {
       return res.status(400).json({
-        message: "Cover image or PDF file is missing"
+        message: "Cover image or PDF file is missing",
       });
     }
 
@@ -46,25 +46,24 @@ exports.createBook = async (req, res) => {
         url: req.files.pdf[0].path,
         public_id: req.files.pdf[0].filename,
       },
-      addedBy: req.user._id, // 🔥 สำคัญ
+      addedBy: req.session.user.id, // ✅ session
     });
 
     res.status(201).json({
       message: "Book created successfully",
       book,
     });
-
   } catch (err) {
     console.error("CREATE BOOK ERROR:", err);
 
     if (err.code === 11000) {
       return res.status(409).json({
-        message: "Book code already exists"
+        message: "Book code already exists",
       });
     }
 
     res.status(500).json({
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -75,28 +74,29 @@ exports.createBook = async (req, res) => {
 exports.getBooks = async (req, res) => {
   try {
     const books = await Book.find({})
+      .populate("addedBy", "email") // 🔥 แสดง email คนเพิ่ม
       .sort({ createdAt: -1 })
-      .lean(); // ⭐ สำคัญ
+      .lean();
 
     res.json(books);
   } catch (err) {
-    console.error("GET BOOKS ERROR 👉", err); // ⭐ ดูตรงนี้ใน terminal
+    console.error("GET BOOKS ERROR 👉", err);
     res.status(500).json({ message: "Failed to fetch books" });
   }
 };
 
-
 /**
  * ❌ Delete Book
- * (ลบ Cloudinary ด้วย)
  */
 exports.deleteBook = async (req, res) => {
   try {
+    if (!req.session.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
     const book = await Book.findById(req.params.id);
     if (!book) {
-      return res.status(404).json({
-        message: "Book not found"
-      });
+      return res.status(404).json({ message: "Book not found" });
     }
 
     // 🖼️ delete cover
@@ -104,7 +104,7 @@ exports.deleteBook = async (req, res) => {
       await cloudinary.uploader.destroy(book.coverImage.public_id);
     }
 
-    // 📄 delete pdf (raw)
+    // 📄 delete pdf
     if (book.pdfFile?.public_id) {
       await cloudinary.uploader.destroy(
         book.pdfFile.public_id,
@@ -114,15 +114,10 @@ exports.deleteBook = async (req, res) => {
 
     await book.deleteOne();
 
-    res.json({
-      message: "Book deleted successfully"
-    });
-
+    res.json({ message: "Book deleted successfully" });
   } catch (err) {
     console.error("DELETE BOOK ERROR:", err);
-    res.status(500).json({
-      message: "Failed to delete book"
-    });
+    res.status(500).json({ message: "Failed to delete book" });
   }
 };
 
@@ -131,18 +126,18 @@ exports.deleteBook = async (req, res) => {
  */
 exports.getDashboardData = async (req, res) => {
   try {
-    if (!req.user) {
-      return res.status(401).json({
-        message: "Unauthorized"
-      });
+    if (!req.session.user) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const userId = req.user._id;
+    const userId = req.session.user.id;
 
     const totalBooks = await Book.countDocuments();
     const myBooks = await Book.countDocuments({ addedBy: userId });
 
+    // 🕒 history (เฉพาะของตัวเอง)
     const history = await Book.find({ addedBy: userId })
+      .populate("addedBy", "email")
       .sort({ createdAt: -1 })
       .limit(5)
       .select("title createdAt");
@@ -150,12 +145,10 @@ exports.getDashboardData = async (req, res) => {
     res.json({
       totalBooks,
       myBooks,
-      history
+      history,
     });
-
   } catch (err) {
-    res.status(500).json({
-      message: err.message
-    });
+    console.error("DASHBOARD ERROR:", err);
+    res.status(500).json({ message: err.message });
   }
 };
