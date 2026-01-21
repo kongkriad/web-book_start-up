@@ -47,3 +47,29 @@ document.getElementById("logoutBtn")?.addEventListener("click", async (e) => {
 
   window.location.href = "/login.html";
 });
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const token = localStorage.getItem("token");
+  if (!token) return location.href = "login.html";
+
+  const res = await fetch("/api/books/dashboard", {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  const data = await res.json();
+
+  document.getElementById("totalBooks").innerText = data.totalBooks;
+  document.getElementById("myBooks").innerText = data.myBooks;
+
+  const table = document.getElementById("historyTable");
+  table.innerHTML = "";
+
+  data.history.forEach(b => {
+    table.innerHTML += `
+      <tr>
+        <td>${b.title}</td>
+        <td>${new Date(b.createdAt).toLocaleString()}</td>
+      </tr>
+    `;
+  });
+});
+

@@ -86,7 +86,6 @@ async function login() {
   const emailInput = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
 
-  // เติม @gmail.com เฉพาะตอนส่งค่า (ไม่แก้ input)
   const emailToSend = emailInput.includes('@')
     ? emailInput
     : emailInput + '@gmail.com';
@@ -94,7 +93,6 @@ async function login() {
   const res = await fetch('/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
     body: JSON.stringify({
       email: emailToSend,
       password
@@ -104,10 +102,15 @@ async function login() {
   const data = await res.json();
 
   if (res.ok) {
-    window.location.href = '/';
+    localStorage.setItem('token', data.token); // ✅ สำคัญ
+    window.location.href = 'index.html';       // ✅ ไป dashboard
+  } else {
+    document.getElementById('result').innerText =
+      data.message || 'Login failed';
   }
 }
 </script>
+
 
 </body>
 </html>

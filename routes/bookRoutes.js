@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-
+const { getDashboardData } = require("../controllers/bookController");
+const auth = require("../middleware/auth");
 const {
   createBook,
   getBooks,
@@ -18,6 +19,7 @@ router.post(
   createBook
 );
 
+router.get("/dashboard", auth, getDashboardData);
 router.get('/', getBooks);
 router.delete('/:id', deleteBook);
 

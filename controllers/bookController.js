@@ -92,3 +92,28 @@ exports.deleteBook = async (req, res) => {
     res.status(500).json({ message: "Failed to delete book" });
   }
 };
+exports.getDashboardData = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // หนังสือทั้งหมดในระบบ
+    const totalBooks = await Book.countDocuments();
+
+    // หนังสือที่ user เพิ่ม
+    const myBooks = await Book.countDocuments({ addedBy: userId });
+
+    // ประวัติ (ล่าสุด 5 รายการ)
+    const history = await Book.find({ addedBy: userId })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select("title createdAt");
+
+    res.json({
+      totalBooks,
+      myBooks,
+      history
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

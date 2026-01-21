@@ -3,7 +3,6 @@ npm install nodemon --save-dev
 npm install bcryptjs
 npm install express-session
 
-
 ```
 star-up
 ├─ README.md
@@ -25,6 +24,7 @@ star-up
 ├─ package-lock.json
 ├─ package.json
 ├─ public
+│  ├─ addbook.html
 │  ├─ css
 │  │  └─ style.css
 │  ├─ index.html
