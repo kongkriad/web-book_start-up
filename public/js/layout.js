@@ -20,3 +20,8 @@ async function logout(e) {
 
   window.location.href = "/login.html";
 }
+fetch("/components/footer.html")
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById("footer").innerHTML = html;
+  });
