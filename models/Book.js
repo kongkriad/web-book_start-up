@@ -34,8 +34,8 @@ const bookSchema = new mongoose.Schema(
 
     addedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
+      ref: "Admin",
+    }
   },
   {
     timestamps: true, // ✅ สร้าง createdAt / updatedAt ให้อัตโนมัติ

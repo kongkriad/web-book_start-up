@@ -3,6 +3,15 @@ npm install nodemon --save-dev
 npm install bcryptjs
 npm install express-session
 
+
+have 5 id all pss:1234
+test0@gmail.com
+test1@gmail.com
+test2@gmail.com
+test3@gmail.com
+test4@gmail.com
+test5@gmail.com
+
 ```
 star-up
 ├─ README.md
