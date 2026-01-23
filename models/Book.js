@@ -5,7 +5,7 @@ const bookSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
 
     bookCode: {
@@ -13,27 +13,33 @@ const bookSchema = new mongoose.Schema(
       required: true,
       unique: true,
       uppercase: true,
-      trim: true
+      trim: true,
     },
 
     coverImage: {
-      url: String,
-      public_id: String
+      url: {
+        type: String,
+        default: "/images/default-cover.png",
+      },
+      public_id: {
+        type: String,
+        default: null,
+      },
     },
 
     pdfFile: {
       url: String,
-      public_id: String
+      public_id: String,
     },
 
     addedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-    }
+    },
   },
   {
-    timestamps: true // ✅ สร้าง createdAt / updatedAt ให้อัตโนมัติ
-  }
+    timestamps: true, // ✅ สร้าง createdAt / updatedAt ให้อัตโนมัติ
+  },
 );
 
 module.exports = mongoose.model("Book", bookSchema);

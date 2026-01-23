@@ -11,7 +11,7 @@ async function loadBooks() {
     div.id = `book-${book._id}`;
 
     div.innerHTML = `
-      <img src="${book.coverImage?.url}" alt="${book.title}">
+      <img src="${book.coverImage?.url || "/images/default-cover.png"}" alt="${book.title}">
       <p>${book.title}</p>
       <button class="btn btn-danger btn-sm" onclick="deleteBook('${book._id}')">
         Delete

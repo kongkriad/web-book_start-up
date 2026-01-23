@@ -12,10 +12,9 @@ exports.createBook = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    // 🔐 validate file
-    if (!req.files?.cover || !req.files?.pdf) {
+    if (!req.files?.pdf) {
       return res.status(400).json({
-        message: "Cover image or PDF file is missing",
+        message: "PDF file is missing",
       });
     }
 
@@ -34,19 +33,22 @@ exports.createBook = async (req, res) => {
 
     const bookCode = `BK-${String(nextNumber).padStart(4, "0")}`;
 
-    // 📦 create book
+    const coverImage = req.files?.cover
+      ? {
+          url: req.files.cover[0].path,
+          public_id: req.files.cover[0].filename,
+        }
+      : undefined; // ❗ ปล่อยให้ schema ใส่ default เอง
+
     const book = await Book.create({
       title: req.body.title?.trim(),
       bookCode,
-      coverImage: {
-        url: req.files.cover[0].path,
-        public_id: req.files.cover[0].filename,
-      },
+      coverImage,
       pdfFile: {
         url: req.files.pdf[0].path,
         public_id: req.files.pdf[0].filename,
       },
-      addedBy: req.session.user.id, // ✅ session
+      addedBy: req.session.user.id,
     });
 
     res.status(201).json({
@@ -106,10 +108,9 @@ exports.deleteBook = async (req, res) => {
 
     // 📄 delete pdf
     if (book.pdfFile?.public_id) {
-      await cloudinary.uploader.destroy(
-        book.pdfFile.public_id,
-        { resource_type: "raw" }
-      );
+      await cloudinary.uploader.destroy(book.pdfFile.public_id, {
+        resource_type: "raw",
+      });
     }
 
     await book.deleteOne();
