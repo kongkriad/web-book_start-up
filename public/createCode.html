@@ -6,103 +6,62 @@
 
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body class="bg-light">
 
-<!-- ✅ Navbar (shared) -->
-<div id="navbar"></div>
-<body class="container mt-4">
+<div class="container mt-4">
+  <h1>สร้างรหัสหนังสือ</h1>
 
-<h1>สร้างรหัสหนังสือ</h1>
+  <!-- FORM -->
+  <form id="codeForm" class="mb-3">
+    <select id="bookSelect" class="form-select mb-2" required>
+      <option value="">-- เลือกหนังสือ --</option>
+    </select>
 
-<form id="codeForm">
-<select id="bookSelect" class="form-select mb-2" required>
-<option value="">-- เลือกหนังสือ --</option>
-</select>
+    <button class="btn btn-primary">สร้างรหัส</button>
+  </form>
 
-<input type="hidden" id="bookTitle">
+  <hr>
 
-<button class="btn btn-primary">สร้างรหัส</button>
-</form>
+  <!-- TABLE -->
+  <h2>รหัสที่สร้างแล้ว</h2>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>รหัส</th>
+        <th>หนังสือ</th>
+        <th>สถานะ</th>
+        <th>วันที่</th>
+        <th>เครื่องมือ</th>
+      </tr>
+    </thead>
+    <tbody id="codeTable"></tbody>
+  </table>
+</div>
 
-<hr>
+<!-- MODAL -->
+<div class="modal fade" id="codeModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">QR Code / Barcode</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <div id="qrBox" class="mb-3"></div>
+        <svg id="barcode"></svg>
+      </div>
+    </div>
+  </div>
+</div>
 
-<h2>รหัสที่สร้างแล้ว</h2>
-<table class="table table-bordered">
-<thead>
-<tr>
-<th>รหัส</th>
-<th>หนังสือ</th>
-<th>สถานะ</th>
-<th>วันที่</th>
-</tr>
-</thead>
-<tbody id="codeTable"></tbody>
-</table>
+<!-- LIB -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 
-<!-- <script>
-// 📚 load books
-fetch("/api/books")
-  .then(res => res.json())
-  .then(books => {
-    const select = document.getElementById("bookSelect");
-    books.forEach(b => {
-      const opt = document.createElement("option");
-      opt.value = b._id;
-      opt.textContent = b.title;
-      select.appendChild(opt);
-    });
-  });
-
-// 🔑 load codes
-function loadCodes() {
-  fetch("/api/books/codes")
-    .then(res => res.json())
-    .then(codes => {
-      const tbody = document.getElementById("codeTable");
-      tbody.innerHTML = "";
-      codes.forEach(c => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${c.code}</td>
-            <td>${c.bookTitle}</td>
-            <td>${c.used ? "ใช้แล้ว" : "ยังไม่ใช้"}</td>
-            <td>${new Date(c.createdAt).toLocaleString()}</td>
-          </tr>
-        `;
-      });
-    });
-}
-loadCodes();
-
-// ➕ submit
-document.getElementById("codeForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const select = document.getElementById("bookSelect");
-
-  fetch("/api/books/create-code", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      bookId: select.value,
-      bookTitle: select.options[select.selectedIndex].text
-    })
-  }).then(() => loadCodes());
-});
-</script> -->
-
-
-    <!-- Footer จากส่วนกลาง -->
-    <div id="footer"></div>
-
-    <!-- JS -->
-    <script src="js/layout.js"></script>
-    <script src="js/createCode.js"></script>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
+<!-- JS -->
+<script src="js/createCode.js"></script>
+</body>
 </html>

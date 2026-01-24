@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const codeTable = document.getElementById("codeTable");
 
   /* =====================
-     LOAD BOOKS (ตอนเข้า)
+     LOAD BOOKS
   ===================== */
   fetch("/api/books")
     .then(res => res.json())
@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   /* =====================
-     LOAD CODES (ตอนเข้า)
+     LOAD CODES
   ===================== */
   function loadCodes() {
     fetch("/api/books/bookcodes")
@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!codes || codes.length === 0) {
           codeTable.innerHTML = `
             <tr>
-              <td colspan="4" class="text-center">ยังไม่มีรหัส</td>
+              <td colspan="5" class="text-center">ยังไม่มีรหัส</td>
             </tr>
           `;
           return;
@@ -42,20 +42,35 @@ document.addEventListener("DOMContentLoaded", () => {
             <td>${c.bookTitle}</td>
             <td>${c.used ? "ใช้แล้ว" : "ยังไม่ใช้"}</td>
             <td>${new Date(c.createdAt).toLocaleString()}</td>
+            <td>
+              <button class="btn btn-sm btn-success me-1"
+                onclick="showQR('${c.code}')">
+                QR
+              </button>
+              <button class="btn btn-sm btn-secondary"
+                onclick="showBarcode('${c.code}')">
+                Barcode
+              </button>
+            </td>
           `;
           codeTable.appendChild(tr);
         });
-      });
+      })
+      .catch(err => console.error(err));
   }
 
-  // ✅ สำคัญมาก → เรียกทันทีตอนเข้า
   loadCodes();
 
   /* =====================
-     SUBMIT FORM
+     SUBMIT
   ===================== */
-  form.addEventListener("submit", async (e) => {
+  form.addEventListener("submit", async e => {
     e.preventDefault();
+
+    if (!bookSelect.value) {
+      alert("กรุณาเลือกหนังสือ");
+      return;
+    }
 
     const res = await fetch("/api/books/createcode", {
       method: "POST",
@@ -68,8 +83,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (res.ok) {
       form.reset();
-      loadCodes(); // 🔁 refresh ตารางทันที
+      loadCodes();
       alert("สร้างรหัสสำเร็จ");
+    } else {
+      alert("สร้างรหัสไม่สำเร็จ");
     }
   });
 });
+
+/* =====================
+   GLOBAL FUNCTIONS
+===================== */
+function showQR(code) {
+  document.getElementById("qrBox").innerHTML = "";
+  document.getElementById("barcode").innerHTML = "";
+
+  new QRCode(document.getElementById("qrBox"), {
+    text: code,
+    width: 200,
+    height: 200
+  });
+
+  new bootstrap.Modal(
+    document.getElementById("codeModal")
+  ).show();
+}
+
+function showBarcode(code) {
+  document.getElementById("qrBox").innerHTML = "";
+  document.getElementById("barcode").innerHTML = "";
+
+  JsBarcode("#barcode", code, {
+    format: "CODE128",
+    width: 2,
+    height: 80,
+    displayValue: true
+  });
+
+  new bootstrap.Modal(
+    document.getElementById("codeModal")
+  ).show();
+}
