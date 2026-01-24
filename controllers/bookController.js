@@ -13,12 +13,9 @@ exports.createBook = async (req, res) => {
     }
 
     if (!req.files?.pdf) {
-      return res.status(400).json({
-        message: "PDF file is missing",
-      });
+      return res.status(400).json({ message: "PDF file is missing" });
     }
 
-    // 🔢 generate bookCode
     const lastBook = await Book.findOne({ bookCode: { $exists: true } })
       .sort({ createdAt: -1 })
       .select("bookCode");
@@ -26,9 +23,7 @@ exports.createBook = async (req, res) => {
     let nextNumber = 1;
     if (lastBook?.bookCode) {
       const lastNumber = parseInt(lastBook.bookCode.split("-")[1], 10);
-      if (!isNaN(lastNumber)) {
-        nextNumber = lastNumber + 1;
-      }
+      if (!isNaN(lastNumber)) nextNumber = lastNumber + 1;
     }
 
     const bookCode = `BK-${String(nextNumber).padStart(4, "0")}`;
@@ -87,30 +82,65 @@ exports.getBooks = async (req, res) => {
   }
 };
 
-/**
- * ❌ Delete Book
- */
-exports.deleteBook = async (req, res) => {
-  try {
-    if (!req.session.user) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
 
+/* =========================
+   📘 GET BOOK BY ID ⭐
+========================= */
+exports.getBookById = async (req, res) => {
+  try {
     const book = await Book.findById(req.params.id);
+
     if (!book) {
       return res.status(404).json({ message: "Book not found" });
     }
 
-    // 🖼️ delete cover
-    if (book.coverImage?.public_id) {
-      await cloudinary.uploader.destroy(book.coverImage.public_id);
+    res.json(book);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+/* =========================
+   ✏️ UPDATE BOOK ⭐
+========================= */
+exports.updateBook = async (req, res) => {
+  try {
+    const { title } = req.body;
+
+    const updateData = { title };
+
+    if (req.files?.cover) {
+      updateData.coverImage = { url: req.files.cover[0].path };
     }
 
-    // 📄 delete pdf
-    if (book.pdfFile?.public_id) {
-      await cloudinary.uploader.destroy(book.pdfFile.public_id, {
-        resource_type: "raw",
-      });
+    if (req.files?.pdf) {
+      updateData.pdfFile = { url: req.files.pdf[0].path };
+    }
+
+    const book = await Book.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    );
+
+    res.json(book);
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+/* =========================
+   ❌ DELETE BOOK
+========================= */
+exports.deleteBook = async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.id);
+
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
     }
 
     await book.deleteOne();

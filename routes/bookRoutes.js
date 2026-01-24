@@ -13,25 +13,57 @@ const upload = require("../middleware/upload");
 const Book = require("../models/Book");
 const Code = require("../models/BookCode");
 
-// ➕ Add book (ต้อง login)
+
+/* =========================
+   ➕ CREATE BOOK
+========================= */
 router.post(
   "/",
-  auth, // 🔥 สำคัญมาก
+  auth,
   upload.fields([
     { name: "cover", maxCount: 1 },
     { name: "pdf", maxCount: 1 }
   ]),
-  createBook
+  bookController.createBook
 );
 
-// 📊 Dashboard
-router.get("/dashboard", auth, getDashboardData);
 
-// 📚 Get all books (ต้อง login)
-router.get("/", auth, getBooks);
+/* =========================
+   ✏️ UPDATE BOOK
+========================= */
+router.put(
+  "/:id",
+  auth,
+  upload.fields([
+    { name: "cover", maxCount: 1 },
+    { name: "pdf", maxCount: 1 }
+  ]),
+  bookController.updateBook
+);
 
-// ❌ Delete book (ต้อง login)
-router.delete("/:id", auth, deleteBook);
+
+/* =========================
+   📊 DASHBOARD
+========================= */
+router.get("/dashboard", auth, bookController.getDashboardData);
+
+
+/* =========================
+   📚 GET ALL BOOKS
+========================= */
+router.get("/", auth, bookController.getBooks);
+
+
+/* =========================
+   📘 GET BOOK BY ID ⭐ (สำคัญ)
+========================= */
+router.get("/:id", auth, bookController.getBookById);
+
+
+/* =========================
+   ❌ DELETE BOOK
+========================= */
+router.delete("/:id", auth, bookController.deleteBook);
 
 // 🔑 ดึงรหัสทั้งหมด
 router.get("/BookCode", auth, async (req, res) => {
