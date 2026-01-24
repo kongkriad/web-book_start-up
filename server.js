@@ -83,6 +83,10 @@ app.get("/addbook", auth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "addbook.html"));
 });
 
+app.get("/createCode", auth, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "createCode.html"));
+});
+
 /* =======================
    START SERVER
 ======================= */
