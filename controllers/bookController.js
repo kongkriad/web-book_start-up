@@ -1,4 +1,5 @@
 const Book = require("../models/Book");
+const BookCode = require("../models/BookCode");
 const cloudinary = require("../config/cloudinary");
 
 /**
@@ -106,27 +107,35 @@ exports.getBookById = async (req, res) => {
 ========================= */
 exports.updateBook = async (req, res) => {
   try {
-    const { title } = req.body;
+    const { title, coverImage, pdfFile } = req.body;
+    const id = req.params.id;
 
     const updateData = { title };
 
-    if (req.files?.cover) {
-      updateData.coverImage = { url: req.files.cover[0].path };
-    }
+    if (coverImage) updateData.coverImage = coverImage;
+    if (pdfFile) updateData.pdfFile = pdfFile;
 
-    if (req.files?.pdf) {
-      updateData.pdfFile = { url: req.files.pdf[0].path };
-    }
-
+    // 🔁 update book
     const book = await Book.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true }
+      id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    // 🔁 sync book title in BookCode
+    await BookCode.updateMany(
+      { bookId: id },
+      { $set: { bookTitle: title } }
     );
 
     res.json(book);
 
   } catch (err) {
+    console.error("Update book error:", err);
     res.status(500).json({ message: err.message });
   }
 };

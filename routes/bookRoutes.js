@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const bookController = require( "../controllers/bookController.js")
 
 const {
   createBook,
@@ -14,6 +15,7 @@ const auth = require("../middleware/auth");
 const upload = require("../middleware/upload");
 const Code = require("../models/BookCode");
 
+router.put("/books/:id", bookController.updateBook);
 
 /* =========================
    ➕ CREATE BOOK
@@ -29,6 +31,7 @@ router.post(
 );
 
 
+
 /* =========================
    ✏️ UPDATE BOOK
 ========================= */
@@ -41,7 +44,15 @@ router.put(
   ]),
   updateBook   // ✅
 );
-
+// router.put(
+//   "/:id",
+//   upload.fields([
+//     { name: "cover", maxCount: 1 },
+//     { name: "pdf", maxCount: 1 },
+//   ]),
+//   bookController.updateBook
+// );
+// router.get("/:id", bookController.getBookById);
 
 /* =========================
    📊 DASHBOARD

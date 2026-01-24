@@ -45,4 +45,5 @@ async function deleteBook(id) {
   document.getElementById(`book-${id}`)?.remove();
 }
 
+
 loadBooks();

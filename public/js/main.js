@@ -228,3 +228,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Dashboard error:", err);
   }
 });
+
+const params = new URLSearchParams(window.location.search);
+const bookId = params.get("id");
+
+if (bookId) {
+  // โหมด edit
+  fetch("/api/books/" + bookId)
+    .then(res => res.json())
+    .then(book => {
+      document.querySelector("input[name='title']").value = book.title;
+    });
+}
+
