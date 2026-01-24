@@ -5,12 +5,13 @@ const {
   createBook,
   getBooks,
   deleteBook,
+  updateBook,        // ⭐ เพิ่ม
+  getBookById,       // ⭐ เพิ่ม
   getDashboardData
 } = require("../controllers/bookController");
 
 const auth = require("../middleware/auth");
 const upload = require("../middleware/upload");
-const Book = require("../models/Book");
 const Code = require("../models/BookCode");
 
 
@@ -24,7 +25,7 @@ router.post(
     { name: "cover", maxCount: 1 },
     { name: "pdf", maxCount: 1 }
   ]),
-  bookController.createBook
+  createBook   // ✅ ไม่ใช้ bookController.
 );
 
 
@@ -38,40 +39,42 @@ router.put(
     { name: "cover", maxCount: 1 },
     { name: "pdf", maxCount: 1 }
   ]),
-  bookController.updateBook
+  updateBook   // ✅
 );
 
 
 /* =========================
    📊 DASHBOARD
 ========================= */
-router.get("/dashboard", auth, bookController.getDashboardData);
+router.get("/dashboard", auth, getDashboardData);
 
 
 /* =========================
    📚 GET ALL BOOKS
 ========================= */
-router.get("/", auth, bookController.getBooks);
+router.get("/", auth, getBooks);
 
 
 /* =========================
-   📘 GET BOOK BY ID ⭐ (สำคัญ)
+   📘 GET BOOK BY ID
 ========================= */
-router.get("/:id", auth, bookController.getBookById);
+router.get("/:id", auth, getBookById);
 
 
 /* =========================
    ❌ DELETE BOOK
 ========================= */
-router.delete("/:id", auth, bookController.deleteBook);
+router.delete("/:id", auth, deleteBook);
 
-// 🔑 ดึงรหัสทั้งหมด
+
+/* =========================
+   🔑 BOOK CODE ROUTES
+========================= */
 router.get("/BookCode", auth, async (req, res) => {
   const codes = await Code.find().sort({ createdAt: -1 });
   res.json(codes);
 });
 
-// ➕ สร้างรหัส
 router.post("/createCode", auth, async (req, res) => {
   const { bookId, bookTitle } = req.body;
 
@@ -86,4 +89,5 @@ router.post("/createCode", auth, async (req, res) => {
 
   res.json({ message: "สร้างรหัสสำเร็จ" });
 });
+
 module.exports = router;
