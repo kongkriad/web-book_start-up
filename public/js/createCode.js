@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const codeTable = document.getElementById("codeTable");
 
   /* =====================
-     LOAD BOOKS
+     LOAD BOOKS (ตอนเข้า)
   ===================== */
   fetch("/api/books")
     .then(res => res.json())
@@ -15,16 +15,13 @@ document.addEventListener("DOMContentLoaded", () => {
         opt.textContent = book.title;
         bookSelect.appendChild(opt);
       });
-    })
-    .catch(err => {
-      console.error("Load books error:", err);
     });
 
   /* =====================
-     LOAD CODES
+     LOAD CODES (ตอนเข้า)
   ===================== */
   function loadCodes() {
-    fetch("/api/books/BookCode")
+    fetch("/api/books/bookcodes")
       .then(res => res.json())
       .then(codes => {
         codeTable.innerHTML = "";
@@ -48,12 +45,10 @@ document.addEventListener("DOMContentLoaded", () => {
           `;
           codeTable.appendChild(tr);
         });
-      })
-      .catch(err => {
-        console.error("Load codes error:", err);
       });
   }
 
+  // ✅ สำคัญมาก → เรียกทันทีตอนเข้า
   loadCodes();
 
   /* =====================
@@ -62,35 +57,19 @@ document.addEventListener("DOMContentLoaded", () => {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    if (!bookSelect.value) {
-      alert("กรุณาเลือกหนังสือ");
-      return;
-    }
+    const res = await fetch("/api/books/createcode", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        bookId: bookSelect.value,
+        bookTitle: bookSelect.options[bookSelect.selectedIndex].text
+      })
+    });
 
-    try {
-      const res = await fetch("/api/books/createcode", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          bookId: bookSelect.value,
-          bookTitle: bookSelect.options[bookSelect.selectedIndex].text
-        })
-      });
-
-      if (!res.ok) {
-        alert("สร้างรหัสไม่สำเร็จ");
-        return;
-      }
-
+    if (res.ok) {
       form.reset();
-      loadCodes();
-      alert("สร้างรหัสสำเร็จแล้ว");
-
-    } catch (err) {
-      console.error("Create code error:", err);
-      alert("เกิดข้อผิดพลาด");
+      loadCodes(); // 🔁 refresh ตารางทันที
+      alert("สร้างรหัสสำเร็จ");
     }
   });
 });

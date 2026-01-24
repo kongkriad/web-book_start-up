@@ -161,6 +161,53 @@ exports.deleteBook = async (req, res) => {
   }
 };
 
+/* =========================
+ 🔑 GET BOOK CODES
+========================= */
+exports.getBookCodes = async (req, res) => {
+  try {
+    const codes = await BookCode.find()
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json(codes);
+  } catch (err) {
+    console.error("GET BOOK CODES ERROR:", err);
+    res.status(500).json({ message: "Load codes failed" });
+  }
+};
+
+/* =========================
+ 🔑 CREATE BOOK CODE
+========================= */
+exports.createBookCode = async (req, res) => {
+  try {
+    const { bookId, bookTitle } = req.body;
+
+    if (!bookId || !bookTitle) {
+      return res.status(400).json({ message: "ข้อมูลไม่ครบ" });
+    }
+
+    const code = Math.random()
+      .toString(36)
+      .substring(2, 8)
+      .toUpperCase();
+
+    await BookCode.create({
+      code,
+      bookId,
+      bookTitle,
+      used: false
+    });
+
+    res.json({ message: "สร้างรหัสสำเร็จ" });
+  } catch (err) {
+    console.error("CREATE CODE ERROR:", err);
+    res.status(500).json({ message: "Create code failed" });
+  }
+};
+
+
 /**
  * 📊 Dashboard Data
  */

@@ -1,24 +1,40 @@
 const express = require("express");
 const router = express.Router();
-const bookController = require( "../controllers/bookController.js")
 
+/* =========================
+ CONTROLLERS
+========================= */
 const {
   createBook,
   getBooks,
+  getBookById,
+  updateBook,
   deleteBook,
-  updateBook,        // ⭐ เพิ่ม
-  getBookById,       // ⭐ เพิ่ม
-  getDashboardData
+  getDashboardData,
+  getBookCodes,
+  createBookCode
 } = require("../controllers/bookController");
 
+/* =========================
+ MIDDLEWARE
+========================= */
 const auth = require("../middleware/auth");
 const upload = require("../middleware/upload");
-const Code = require("../models/BookCode");
-
-router.put("/books/:id", bookController.updateBook);
 
 /* =========================
-   ➕ CREATE BOOK
+ 🔑 BOOK CODE ROUTES (ต้องอยู่บนสุด)
+========================= */
+router.get("/bookcodes", auth, getBookCodes);
+
+router.post("/createcode", auth, createBookCode);
+
+/* =========================
+ 📊 DASHBOARD
+========================= */
+router.get("/dashboard", auth, getDashboardData);
+
+/* =========================
+ ➕ CREATE BOOK
 ========================= */
 router.post(
   "/",
@@ -27,13 +43,21 @@ router.post(
     { name: "cover", maxCount: 1 },
     { name: "pdf", maxCount: 1 }
   ]),
-  createBook   // ✅ ไม่ใช้ bookController.
+  createBook
 );
 
-
+/* =========================
+ 📚 GET ALL BOOKS
+========================= */
+router.get("/", auth, getBooks);
 
 /* =========================
-   ✏️ UPDATE BOOK
+ 📘 GET BOOK BY ID
+========================= */
+router.get("/:id", auth, getBookById);
+
+/* =========================
+ ✏️ UPDATE BOOK
 ========================= */
 router.put(
   "/:id",
@@ -42,63 +66,12 @@ router.put(
     { name: "cover", maxCount: 1 },
     { name: "pdf", maxCount: 1 }
   ]),
-  updateBook   // ✅
+  updateBook
 );
-// router.put(
-//   "/:id",
-//   upload.fields([
-//     { name: "cover", maxCount: 1 },
-//     { name: "pdf", maxCount: 1 },
-//   ]),
-//   bookController.updateBook
-// );
-// router.get("/:id", bookController.getBookById);
 
 /* =========================
-   📊 DASHBOARD
-========================= */
-router.get("/dashboard", auth, getDashboardData);
-
-
-/* =========================
-   📚 GET ALL BOOKS
-========================= */
-router.get("/", auth, getBooks);
-
-
-/* =========================
-   📘 GET BOOK BY ID
-========================= */
-router.get("/:id", auth, getBookById);
-
-
-/* =========================
-   ❌ DELETE BOOK
+ ❌ DELETE BOOK
 ========================= */
 router.delete("/:id", auth, deleteBook);
-
-
-/* =========================
-   🔑 BOOK CODE ROUTES
-========================= */
-router.get("/BookCode", auth, async (req, res) => {
-  const codes = await Code.find().sort({ createdAt: -1 });
-  res.json(codes);
-});
-
-router.post("/createCode", auth, async (req, res) => {
-  const { bookId, bookTitle } = req.body;
-
-  const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-
-  await Code.create({
-    code,
-    bookId,
-    bookTitle,
-    used: false
-  });
-
-  res.json({ message: "สร้างรหัสสำเร็จ" });
-});
 
 module.exports = router;
