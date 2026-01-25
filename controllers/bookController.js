@@ -208,6 +208,53 @@ exports.createBookCode = async (req, res) => {
   }
 };
 
+// exports.generateQRCode = async (req, res) => {
+//   try {
+//     const { codeId } = req.params;
+
+//     const bookCode = await BookCode.findById(codeId);
+//     if (!bookCode) {
+//       return res.status(404).json({ message: "Code not found" });
+//     }
+
+//     // 🧾 ข้อมูลใน QR
+//     const qrText = bookCode.code;
+
+//     // 🔁 สร้าง QR เป็น buffer
+//     const qrBuffer = await QRCode.toBuffer(qrText, {
+//       width: 300,
+//       margin: 2,
+//     });
+
+//     // ☁️ upload cloudinary (stream)
+//     const uploadResult = await new Promise((resolve, reject) => {
+//       cloudinary.uploader.upload_stream(
+//         {
+//           folder: "book-qrcode",
+//         },
+//         (error, result) => {
+//           if (error) reject(error);
+//           else resolve(result);
+//         }
+//       ).end(qrBuffer);
+//     });
+
+//     // 💾 save ลง DB
+//     bookCode.qrImage = {
+//       url: uploadResult.secure_url,
+//       public_id: uploadResult.public_id,
+//     };
+//     await bookCode.save();
+
+//     res.json({
+//       message: "QR Code created",
+//       qrUrl: uploadResult.secure_url,
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "Generate QR failed" });
+//   }
+// };
 exports.generateQRCode = async (req, res) => {
   try {
     const { codeId } = req.params;
@@ -217,21 +264,14 @@ exports.generateQRCode = async (req, res) => {
       return res.status(404).json({ message: "Code not found" });
     }
 
-    // 🧾 ข้อมูลใน QR
-    const qrText = bookCode.code;
-
-    // 🔁 สร้าง QR เป็น buffer
-    const qrBuffer = await QRCode.toBuffer(qrText, {
+    const qrBuffer = await QRCode.toBuffer(bookCode.code, {
       width: 300,
       margin: 2,
     });
 
-    // ☁️ upload cloudinary (stream)
     const uploadResult = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
-        {
-          folder: "book-qrcode",
-        },
+        { folder: "book-qrcode" },
         (error, result) => {
           if (error) reject(error);
           else resolve(result);
@@ -239,22 +279,23 @@ exports.generateQRCode = async (req, res) => {
       ).end(qrBuffer);
     });
 
-    // 💾 save ลง DB
     bookCode.qrImage = {
       url: uploadResult.secure_url,
       public_id: uploadResult.public_id,
     };
+
     await bookCode.save();
 
-    res.json({
-      message: "QR Code created",
-      qrUrl: uploadResult.secure_url,
-    });
+    // 🔥 ดึงใหม่จาก DB ให้ข้อมูลครบ
+    const updatedCode = await BookCode.findById(codeId).lean();
+
+    res.json(updatedCode);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Generate QR failed" });
   }
 };
+
 
 /**
  * 📊 Dashboard Data
@@ -287,3 +328,17 @@ exports.getDashboardData = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+// exports.createQRCode = async (req, res) => {
+//   const code = await BookCode.findById(req.params.id);
+
+//   // generate QR + upload cloudinary
+//   code.qrImage = {
+//     url: uploaded.url,
+//     public_id: uploaded.public_id
+//   };
+
+//   await code.save();
+//   res.json(code);
+// };
+

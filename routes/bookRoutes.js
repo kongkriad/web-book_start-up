@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const { generateQRCode } = require("../controllers/bookController");
+const BookCode = require("../models/BookCode");
+
 
 /* =========================
  CONTROLLERS
@@ -78,5 +80,23 @@ router.put(
  ❌ DELETE BOOK
 ========================= */
 router.delete("/:id", auth, deleteBook);
+router.delete("/bookcodes/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deleted = await BookCode.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "ไม่พบข้อมูล" });
+    }
+
+    res.json({ message: "ลบสำเร็จ" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json(err);
+  }
+});
+
+
 
 module.exports = router;
