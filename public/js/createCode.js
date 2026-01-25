@@ -43,14 +43,11 @@ document.addEventListener("DOMContentLoaded", () => {
             <td>${c.used ? "ใช้แล้ว" : "ยังไม่ใช้"}</td>
             <td>${new Date(c.createdAt).toLocaleString()}</td>
             <td>
-              <button class="btn btn-sm btn-success me-1"
-                onclick="showQR('${c.code}')">
-                QR
-              </button>
-              <button class="btn btn-sm btn-secondary"
-                onclick="showBarcode('${c.code}')">
-                Barcode
-              </button>
+              ${
+                c.qrImage?.url
+                  ? `<a href="${c.qrImage.url}" target="_blank" class="btn btn-success btn-sm">ดู QR</a>`
+                  : `<button class="btn btn-primary btn-sm" onclick="createQR('${c._id}')">สร้าง QR</button>`
+              }
             </td>
           `;
           codeTable.appendChild(tr);
@@ -90,6 +87,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+async function createQR(codeId) {
+  if (!confirm("สร้าง QR Code ?")) return;
+
+  const res = await fetch(`/api/books/bookcodes/${codeId}/qrcode`, {
+    method: "POST",
+  });
+
+  if (res.ok) {
+    alert("สร้าง QR สำเร็จ");
+    loadCodes();
+  } else {
+    alert("สร้าง QR ไม่สำเร็จ");
+  }
+}
 
 /* =====================
    GLOBAL FUNCTIONS

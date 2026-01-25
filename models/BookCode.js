@@ -30,6 +30,12 @@ const BookCodeSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  qrImage: {
+      url: String,
+      public_id: String,
+    },
+  },
+  { timestamps: true 
 });
 
 module.exports = mongoose.model("BookCode", BookCodeSchema);

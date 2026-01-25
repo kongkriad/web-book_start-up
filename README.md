@@ -3,6 +3,7 @@ npm install nodemon --save-dev
 npm install bcryptjs
 npm install express-session
 
+npm install qrcode
 
 have 5 id all pss:1234
 test0@gmail.com
@@ -29,15 +30,20 @@ star-up
 │  └─ upload.js
 ├─ models
 │  ├─ Book.js
+│  ├─ BookCode.js
 │  └─ User.js
 ├─ package-lock.json
 ├─ package.json
 ├─ public
 │  ├─ addbook.html
+│  ├─ createCode.html
 │  ├─ css
 │  │  └─ style.css
+│  ├─ images
+│  │  └─ default-cover.png
 │  ├─ index.html
 │  ├─ js
+│  │  ├─ createCode.js
 │  │  ├─ layout.js
 │  │  ├─ library.js
 │  │  └─ main.js

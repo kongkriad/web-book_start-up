@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { generateQRCode } = require("../controllers/bookController");
 
 /* =========================
  CONTROLLERS
@@ -27,6 +28,10 @@ const upload = require("../middleware/upload");
 router.get("/bookcodes", auth, getBookCodes);
 
 router.post("/createcode", auth, createBookCode);
+/*
+  qrcode
+*/
+router.post("/bookcodes/:codeId/qrcode", auth, generateQRCode);
 
 /* =========================
  📊 DASHBOARD
