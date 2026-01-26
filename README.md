@@ -2,6 +2,8 @@ npm install express mongoose dotenv cors multer cloudinary multer-storage-cloudi
 npm install nodemon --save-dev
 npm install bcryptjs
 npm install express-session
+npm install connect-mongo@4
+
 
 npm install qrcode
 
