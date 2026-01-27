@@ -3,10 +3,9 @@ const BookCode = require("../models/BookCode");
 const cloudinary = require("../config/cloudinary");
 const QRCode = require("qrcode");
 
-/**
- * ➕ Create Book
- * (ต้อง login ก่อน — ใช้ session)
- */
+/* =========================
+   ➕ CREATE BOOK
+========================= */
 exports.createBook = async (req, res) => {
   try {
     // 🔐 check session
@@ -14,10 +13,17 @@ exports.createBook = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    if (!req.files?.pdf) {
+    // ✅ validate detail
+    if (!req.body.detail || !req.body.detail.trim()) {
+      return res.status(400).json({ message: "Detail is required" });
+    }
+
+    // ✅ validate pdf
+    if (!req.files?.pdf || req.files.pdf.length === 0) {
       return res.status(400).json({ message: "PDF file is missing" });
     }
 
+    // 🔢 generate bookCode
     const lastBook = await Book.findOne({ bookCode: { $exists: true } })
       .sort({ createdAt: -1 })
       .select("bookCode");
@@ -30,15 +36,18 @@ exports.createBook = async (req, res) => {
 
     const bookCode = `BK-${String(nextNumber).padStart(4, "0")}`;
 
-    const coverImage = req.files?.cover
+    // 🖼 cover (optional)
+    const coverImage = req.files.cover?.length
       ? {
           url: req.files.cover[0].path,
           public_id: req.files.cover[0].filename,
         }
-      : undefined; // ❗ ปล่อยให้ schema ใส่ default เอง
+      : undefined;
 
+    // 📘 create book
     const book = await Book.create({
       title: req.body.title?.trim(),
+      detail: req.body.detail.trim(),
       bookCode,
       coverImage,
       pdfFile: {
@@ -48,45 +57,43 @@ exports.createBook = async (req, res) => {
       addedBy: req.session.user.id,
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Book created successfully",
       book,
     });
+
   } catch (err) {
     console.error("CREATE BOOK ERROR:", err);
 
     if (err.code === 11000) {
-      return res.status(409).json({
-        message: "Book code already exists",
-      });
+      return res.status(409).json({ message: "Book code already exists" });
     }
 
-    res.status(500).json({
-      message: "Internal server error",
-    });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
-/**
- * 📚 Get All Books
- */
+
+/* =========================
+   📚 GET ALL BOOKS
+========================= */
 exports.getBooks = async (req, res) => {
   try {
     const books = await Book.find({})
-      .populate("addedBy", "email") // 🔥 แสดง email คนเพิ่ม
+      .populate("addedBy", "email")
       .sort({ createdAt: -1 })
       .lean();
 
     res.json(books);
   } catch (err) {
-    console.error("GET BOOKS ERROR 👉", err);
+    console.error("GET BOOKS ERROR:", err);
     res.status(500).json({ message: "Failed to fetch books" });
   }
 };
 
 
 /* =========================
-   📘 GET BOOK BY ID ⭐
+   📘 GET BOOK BY ID
 ========================= */
 exports.getBookById = async (req, res) => {
   try {
@@ -104,19 +111,35 @@ exports.getBookById = async (req, res) => {
 
 
 /* =========================
-   ✏️ UPDATE BOOK ⭐
+   ✏️ UPDATE BOOK
 ========================= */
 exports.updateBook = async (req, res) => {
   try {
-    const { title, coverImage, pdfFile } = req.body;
     const id = req.params.id;
 
-    const updateData = { title };
+    if (!req.body.detail || !req.body.detail.trim()) {
+      return res.status(400).json({ message: "Detail is required" });
+    }
 
-    if (coverImage) updateData.coverImage = coverImage;
-    if (pdfFile) updateData.pdfFile = pdfFile;
+    const updateData = {
+      title: req.body.title?.trim(),
+      detail: req.body.detail.trim(),
+    };
 
-    // 🔁 update book
+    if (req.files?.cover?.length) {
+      updateData.coverImage = {
+        url: req.files.cover[0].path,
+        public_id: req.files.cover[0].filename,
+      };
+    }
+
+    if (req.files?.pdf?.length) {
+      updateData.pdfFile = {
+        url: req.files.pdf[0].path,
+        public_id: req.files.pdf[0].filename,
+      };
+    }
+
     const book = await Book.findByIdAndUpdate(
       id,
       { $set: updateData },
@@ -127,16 +150,16 @@ exports.updateBook = async (req, res) => {
       return res.status(404).json({ message: "Book not found" });
     }
 
-    // 🔁 sync book title in BookCode
+    // 🔁 sync title in BookCode
     await BookCode.updateMany(
       { bookId: id },
-      { $set: { bookTitle: title } }
+      { $set: { bookTitle: updateData.title } }
     );
 
     res.json(book);
 
   } catch (err) {
-    console.error("Update book error:", err);
+    console.error("UPDATE BOOK ERROR:", err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -154,16 +177,17 @@ exports.deleteBook = async (req, res) => {
     }
 
     await book.deleteOne();
-
     res.json({ message: "Book deleted successfully" });
+
   } catch (err) {
     console.error("DELETE BOOK ERROR:", err);
     res.status(500).json({ message: "Failed to delete book" });
   }
 };
 
+
 /* =========================
- 🔑 GET BOOK CODES
+   🔑 GET BOOK CODES
 ========================= */
 exports.getBookCodes = async (req, res) => {
   try {
@@ -178,8 +202,9 @@ exports.getBookCodes = async (req, res) => {
   }
 };
 
+
 /* =========================
- 🔑 CREATE BOOK CODE
+   🔑 CREATE BOOK CODE
 ========================= */
 exports.createBookCode = async (req, res) => {
   try {
@@ -198,7 +223,7 @@ exports.createBookCode = async (req, res) => {
       code,
       bookId,
       bookTitle,
-      used: false
+      used: false,
     });
 
     res.json({ message: "สร้างรหัสสำเร็จ" });
@@ -208,53 +233,10 @@ exports.createBookCode = async (req, res) => {
   }
 };
 
-// exports.generateQRCode = async (req, res) => {
-//   try {
-//     const { codeId } = req.params;
 
-//     const bookCode = await BookCode.findById(codeId);
-//     if (!bookCode) {
-//       return res.status(404).json({ message: "Code not found" });
-//     }
-
-//     // 🧾 ข้อมูลใน QR
-//     const qrText = bookCode.code;
-
-//     // 🔁 สร้าง QR เป็น buffer
-//     const qrBuffer = await QRCode.toBuffer(qrText, {
-//       width: 300,
-//       margin: 2,
-//     });
-
-//     // ☁️ upload cloudinary (stream)
-//     const uploadResult = await new Promise((resolve, reject) => {
-//       cloudinary.uploader.upload_stream(
-//         {
-//           folder: "book-qrcode",
-//         },
-//         (error, result) => {
-//           if (error) reject(error);
-//           else resolve(result);
-//         }
-//       ).end(qrBuffer);
-//     });
-
-//     // 💾 save ลง DB
-//     bookCode.qrImage = {
-//       url: uploadResult.secure_url,
-//       public_id: uploadResult.public_id,
-//     };
-//     await bookCode.save();
-
-//     res.json({
-//       message: "QR Code created",
-//       qrUrl: uploadResult.secure_url,
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Generate QR failed" });
-//   }
-// };
+/* =========================
+   🔳 GENERATE QR CODE
+========================= */
 exports.generateQRCode = async (req, res) => {
   try {
     const { codeId } = req.params;
@@ -286,20 +268,19 @@ exports.generateQRCode = async (req, res) => {
 
     await bookCode.save();
 
-    // 🔥 ดึงใหม่จาก DB ให้ข้อมูลครบ
     const updatedCode = await BookCode.findById(codeId).lean();
-
     res.json(updatedCode);
+
   } catch (err) {
-    console.error(err);
+    console.error("GENERATE QR ERROR:", err);
     res.status(500).json({ message: "Generate QR failed" });
   }
 };
 
 
-/**
- * 📊 Dashboard Data
- */
+/* =========================
+   📊 DASHBOARD DATA
+========================= */
 exports.getDashboardData = async (req, res) => {
   try {
     if (!req.session.user) {
@@ -311,7 +292,6 @@ exports.getDashboardData = async (req, res) => {
     const totalBooks = await Book.countDocuments();
     const myBooks = await Book.countDocuments({ addedBy: userId });
 
-    // 🕒 history (เฉพาะของตัวเอง)
     const history = await Book.find({ addedBy: userId })
       .populate("addedBy", "email")
       .sort({ createdAt: -1 })
@@ -323,22 +303,9 @@ exports.getDashboardData = async (req, res) => {
       myBooks,
       history,
     });
+
   } catch (err) {
     console.error("DASHBOARD ERROR:", err);
     res.status(500).json({ message: err.message });
   }
 };
-
-// exports.createQRCode = async (req, res) => {
-//   const code = await BookCode.findById(req.params.id);
-
-//   // generate QR + upload cloudinary
-//   code.qrImage = {
-//     url: uploaded.url,
-//     public_id: uploaded.public_id
-//   };
-
-//   await code.save();
-//   res.json(code);
-// };
-

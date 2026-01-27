@@ -15,6 +15,11 @@ const bookSchema = new mongoose.Schema(
       uppercase: true,
       trim: true,
     },
+    detail: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
     coverImage: {
       url: {

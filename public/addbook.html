@@ -15,7 +15,7 @@
 <!-- ✅ Navbar (shared) -->
 <div id="navbar"></div>
 
-<!-- ✅ Content (สำคัญมาก) -->
+<!-- ✅ Content -->
 <div class="main-content">
   <div class="container mt-5">
     <div class="card shadow">
@@ -24,25 +24,35 @@
         <h4 id="pageTitle" class="mb-4">📘 Add Book</h4>
         <p id="create-message" class="text-center mt-3 fw-bold"></p>
 
+        <!-- Book Title -->
         <div class="mb-3">
           <label class="form-label">Book Title</label>
           <input id="title" class="form-control" />
         </div>
 
+        <!-- Book Cover -->
         <div class="mb-3">
           <label class="form-label">Book Cover</label>
-
           <input type="file" id="cover" class="form-control" accept="image/*" />
           <img id="coverPreview" style="max-width:150px;margin-top:10px;display:none;">
-
         </div>
 
+        <!-- Detail -->
+        <div class="mb-3">
+          <label class="form-label">Detail</label>
+          <textarea
+            id="detail"
+            class="form-control"
+            rows="4"
+            placeholder="Enter book detail..."
+          ></textarea>
+        </div>
+
+        <!-- Book PDF -->
         <div class="mb-3">
           <label class="form-label">Book PDF</label>
-
           <input type="file" id="pdf" class="form-control" accept="application/pdf" />
-          <small id="pdfName" class="text-muted"></small>
-
+          <small id="pdfFileName" class="text-muted"></small>
         </div>
 
         <button id="submitBtn" class="btn btn-primary w-100" onclick="submitBook()">
@@ -58,5 +68,14 @@
 
 <script src="js/layout.js"></script>
 <script src="js/main.js"></script>
+
+<!-- แสดงชื่อไฟล์ PDF -->
+<script>
+  document.getElementById("pdf").addEventListener("change", function () {
+    document.getElementById("pdfFileName").textContent =
+      this.files[0]?.name || "";
+  });
+</script>
+
 </body>
 </html>
