@@ -2,6 +2,7 @@ const Book = require("../models/Book");
 const BookCode = require("../models/BookCode");
 const cloudinary = require("../config/cloudinary");
 const QRCode = require("qrcode");
+const bwipjs = require("bwip-js");
 
 /* =========================
    ➕ CREATE BOOK
@@ -277,6 +278,59 @@ exports.generateQRCode = async (req, res) => {
   }
 };
 
+/* =========================
+ 🟦 GENERATE BARCODE
+========================= */
+exports.generateBarcode = async (req, res) => {
+  try {
+    const { codeId } = req.params;
+
+    const bookCode = await BookCode.findById(codeId);
+    if (!bookCode) {
+      return res.status(404).json({ message: "Code not found" });
+    }
+
+    // ❌ มีแล้วไม่ต้องสร้างซ้ำ
+    if (bookCode.barcodeImage?.url) {
+      return res.json(bookCode);
+    }
+
+    // 1️⃣ สร้าง barcode buffer
+    const png = await bwipjs.toBuffer({
+      bcid: "code128",
+      text: bookCode.code,
+      scale: 3,
+      height: 10,
+      includetext: true,
+      textxalign: "center",
+    });
+
+    // 2️⃣ upload cloudinary
+    const uploadResult = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        { folder: "book-barcode" },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      ).end(png);
+    });
+
+    // 3️⃣ save db
+    bookCode.barcodeImage = {
+      url: uploadResult.secure_url,
+      public_id: uploadResult.public_id,
+    };
+    await bookCode.save();
+
+    const updatedCode = await BookCode.findById(codeId).lean();
+    res.json(updatedCode);
+
+  } catch (err) {
+    console.error("GENERATE BARCODE ERROR:", err);
+    res.status(500).json({ message: "Generate barcode failed" });
+  }
+};
 
 /* =========================
    📊 DASHBOARD DATA

@@ -2,6 +2,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("codeForm");
   const bookSelect = document.getElementById("bookSelect");
 
+  /* =====================
+     LOAD BOOKS
+  ===================== */
   fetch("/api/books")
     .then(res => res.json())
     .then(books => {
@@ -15,6 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadCodes();
 
+  /* =====================
+     CREATE BOOK CODE
+  ===================== */
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -42,29 +48,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// async function createQR(codeId) {
-//   if (!confirm("สร้าง QR Code ?")) return;
-
-//   const res = await fetch(`/api/books/bookcodes/${codeId}/qrcode`, {
-//     method: "POST",
-//   });
-
-//   if (res.ok) {
-//     alert("สร้าง QR สำเร็จ");
-//     loadCodes();
-//   } else {
-//     alert("สร้าง QR ไม่สำเร็จ");
-//   }
-// }
+/* =====================
+   QR CODE
+===================== */
 async function createQR(codeId) {
   if (!confirm("สร้าง QR Code ?")) return;
-
-  const toolCell = document.getElementById(`tool-${codeId}`);
-  toolCell.innerHTML = `
-    <button class="btn btn-secondary btn-sm" disabled>
-      กำลังสร้าง...
-    </button>
-  `;
 
   const res = await fetch(`/api/books/bookcodes/${codeId}/qrcode`, {
     method: "POST",
@@ -72,22 +60,34 @@ async function createQR(codeId) {
 
   if (!res.ok) {
     alert("สร้าง QR ไม่สำเร็จ");
-    loadCodes(); // rollback
     return;
   }
 
   const updatedCode = await res.json();
-
-  // 🔥 เปลี่ยนเป็นปุ่ม "ดู QR" ทันที
-  const row = document.getElementById(`code-${codeId}`);
-  row.innerHTML = renderRow(updatedCode);
-
-  alert("สร้าง QR สำเร็จ");
+  document.getElementById(`code-${codeId}`).innerHTML = renderRow(updatedCode);
 }
 
+/* =====================
+   BARCODE
+===================== */
+async function createBarcode(codeId) {
+  if (!confirm("สร้าง Barcode ?")) return;
+
+  const res = await fetch(`/api/books/bookcodes/${codeId}/barcode`, {
+    method: "POST",
+  });
+
+  if (!res.ok) {
+    alert("สร้าง Barcode ไม่สำเร็จ");
+    return;
+  }
+
+  const updatedCode = await res.json();
+  document.getElementById(`code-${codeId}`).innerHTML = renderRow(updatedCode);
+}
 
 /* =====================
-   GLOBAL FUNCTIONS
+   MODAL VIEW
 ===================== */
 function showQR(code) {
   document.getElementById("qrBox").innerHTML = "";
@@ -116,13 +116,19 @@ function showBarcode(code) {
   new bootstrap.Modal(document.getElementById("codeModal")).show();
 }
 
+/* =====================
+   TABLE
+===================== */
 function renderRow(c) {
   return `
     <td>${c.code}</td>
     <td>${c.bookTitle}</td>
     <td>${c.used ? "ใช้แล้ว" : "ยังไม่ใช้"}</td>
     <td>${new Date(c.createdAt).toLocaleString()}</td>
-    <td id="tool-${c._id}">
+
+    <!-- 🔧 COLUMN เครื่องมือ -->
+    <td class="text-nowrap">
+
       ${
         c.qrImage?.url
           ? `<a href="${c.qrImage.url}" target="_blank"
@@ -131,22 +137,37 @@ function renderRow(c) {
                onclick="createQR('${c._id}')">สร้าง QR</button>`
       }
 
+      ${
+        c.barcodeImage?.url
+          ? `<a href="${c.barcodeImage.url}" target="_blank"
+               class="btn btn-info btn-sm me-1">ดู Barcode</a>`
+          : `<button class="btn btn-warning btn-sm me-1"
+               onclick="createBarcode('${c._id}')">สร้าง Barcode</button>`
+      }
+
+      <!-- ❌ ปุ่มลบ (อยู่ column เดียวกัน) -->
       <button class="btn btn-danger btn-sm"
         onclick="deleteCode('${c._id}')">
         ลบ
       </button>
+
     </td>
   `;
 }
+
+/* =====================
+   LOAD CODES
+===================== */
+
 function loadCodes() {
   fetch("/api/books/bookcodes")
     .then(res => res.json())
     .then(codes => {
-      const codeTable = document.getElementById("codeTable");
-      codeTable.innerHTML = "";
+      const table = document.getElementById("codeTable");
+      table.innerHTML = "";
 
       if (!codes.length) {
-        codeTable.innerHTML = `
+        table.innerHTML = `
           <tr>
             <td colspan="5" class="text-center">ยังไม่มีรหัส</td>
           </tr>`;
@@ -157,10 +178,14 @@ function loadCodes() {
         const tr = document.createElement("tr");
         tr.id = `code-${c._id}`;
         tr.innerHTML = renderRow(c);
-        codeTable.appendChild(tr);
+        table.appendChild(tr);
       });
     });
 }
+
+/* =====================
+   DELETE CODE
+===================== */
 async function deleteCode(codeId) {
   if (!confirm("ต้องการลบรหัสนี้ใช่หรือไม่?")) return;
 

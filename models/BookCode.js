@@ -34,6 +34,10 @@ const BookCodeSchema = new mongoose.Schema({
       url: String,
       public_id: String,
     },
+    barcodeImage: {
+      url: String,
+      public_id: String,
+    },
   },
   { timestamps: true 
 });

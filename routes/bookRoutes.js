@@ -1,8 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { generateQRCode } = require("../controllers/bookController");
 const BookCode = require("../models/BookCode");
-
 
 /* =========================
  CONTROLLERS
@@ -15,7 +13,9 @@ const {
   deleteBook,
   getDashboardData,
   getBookCodes,
-  createBookCode
+  createBookCode,
+  generateQRCode,
+  generateBarcode,   // ✅ ชื่อถูกต้อง
 } = require("../controllers/bookController");
 
 /* =========================
@@ -25,15 +25,38 @@ const auth = require("../middleware/auth");
 const upload = require("../middleware/upload");
 
 /* =========================
- 🔑 BOOK CODE ROUTES (ต้องอยู่บนสุด)
+ 🔑 BOOK CODE ROUTES
 ========================= */
 router.get("/bookcodes", auth, getBookCodes);
 
 router.post("/createcode", auth, createBookCode);
-/*
-  qrcode
-*/
-router.post("/bookcodes/:codeId/qrcode", auth, generateQRCode);
+
+// QR Code
+router.post(
+  "/bookcodes/:codeId/qrcode",
+  auth,
+  generateQRCode
+);
+
+// Barcode
+router.post(
+  "/bookcodes/:codeId/barcode",
+  auth,
+  generateBarcode
+);
+
+// delete book code
+router.delete("/bookcodes/:id", auth, async (req, res) => {
+  try {
+    const deleted = await BookCode.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ message: "ไม่พบข้อมูล" });
+    }
+    res.json({ message: "ลบสำเร็จ" });
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
 
 /* =========================
  📊 DASHBOARD
@@ -48,7 +71,7 @@ router.post(
   auth,
   upload.fields([
     { name: "cover", maxCount: 1 },
-    { name: "pdf", maxCount: 1 }
+    { name: "pdf", maxCount: 1 },
   ]),
   createBook
 );
@@ -71,7 +94,7 @@ router.put(
   auth,
   upload.fields([
     { name: "cover", maxCount: 1 },
-    { name: "pdf", maxCount: 1 }
+    { name: "pdf", maxCount: 1 },
   ]),
   updateBook
 );
@@ -96,7 +119,5 @@ router.delete("/bookcodes/:id", async (req, res) => {
     res.status(500).json(err);
   }
 });
-
-
 
 module.exports = router;

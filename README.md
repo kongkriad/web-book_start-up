@@ -4,8 +4,9 @@ npm install bcryptjs
 npm install express-session
 npm install connect-mongo@4
 
-
 npm install qrcode
+npm install bwip-js
+npm i jsbarcode canvas
 
 have 5 id all pss:1234
 test0@gmail.com
